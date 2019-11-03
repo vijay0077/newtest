@@ -1,9 +1,29 @@
 pipeline {
-    agent { docker { image 'python:3.5.1' } }
-    stages {
-        stage('build') {
+    agent { node 'master' }
+    
+    parameters {
+        string(defaultValue: "", description: 'Enter the user name', name: 'username')
+    }
+    
+    stages{
+        stage('Prepare') {
             steps {
-                sh 'python --version'
+                sh 'git clone https://github.com/4iglance/ansible.git'
+            }
+        }
+    stage('After Checkout') {
+            steps {
+                sh 'pwd; ls'
+            }
+        }
+    stage('Run Playbook') {
+        steps {
+            sh 'ansible-playbook ansible/httpd.yaml -u centos -b -e "user=$username"'
+        }
+    }
+    stage('Wipe out workspace') {
+            steps {
+                deleteDir()
             }
         }
     }
